@@ -8,6 +8,8 @@ import pandas as pd
 import sys
 from fair_logloss import DP_fair_logloss_classifier, EOPP_fair_logloss_classifier, EODD_fair_logloss_classifier
 
+from sklearn.metrics import accuracy_score
+
 
 def compute_error(Yhat,proba,Y):
     err = 1 - np.sum(Yhat == Y) / Y.shape[0] 
@@ -44,7 +46,7 @@ if __name__ == '__main__':
     #outfile_tr = open(filename_tr,"w")
     #outfile_ts = open(filename_ts,"w")
 
-    for r in range(20):
+    for r in range(1):
         #order = perm[r,:]
         xz_train = np.load('../temp-bins/xz_train.npy')
         y_train = np.load('../temp-bins/y_train.npy') 
@@ -56,10 +58,10 @@ if __name__ == '__main__':
 
         tr_X = pd.DataFrame(xz_train)
         ts_X = pd.DataFrame(xz_test)
-        tr_A = pd.DataFrame(z_train)
-        ts_A = pd.DataFrame(z_test)
-        tr_Y = pd.DataFrame(y_train)
-        ts_Y = pd.DataFrame(y_test)
+        tr_A = pd.Series(z_train)
+        ts_A = pd.Series(z_test)
+        tr_Y = pd.Series(y_train)
+        ts_Y = pd.Series(y_test)
         tr_sz = len(tr_X)
 
         # tr_sz = int(np.floor(.7 * dataX.shape[0]))
@@ -93,10 +95,11 @@ if __name__ == '__main__':
         violation_tr = h.fairness_violation(tr_X.values, tr_Y.values, tr_A.values)
         violation_ts = h.fairness_violation(ts_X.values, ts_Y.values, ts_A.values)
 
-        print("---------------------------- Random Split %d ----------------------------------" % (r + 1))
-        print("Train - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_tr, exp_zo_tr,violation_tr))
-        print("Test  - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_ts, exp_zo_ts,violation_ts))
+        # print("---------------------------- Random Split %d ----------------------------------" % (r + 1))
+        # print("Train - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_tr, exp_zo_tr,violation_tr))
+        # print("Test  - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_ts, exp_zo_ts,violation_ts))
         print("")
+        print(accuracy_score(h.predict(ts_X, ts_A), ts_Y))
 
         #outfile_ts.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_ts,err_ts, violation_ts))
         #outfile_tr.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_tr,err_tr, violation_tr))
