@@ -41,10 +41,10 @@ if __name__ == '__main__':
     filename_tr = "results/fairll_{}_{:.3f}_{}_tr.csv".format(dataset,C,criteria)
     filename_ts = "results/fairll_{}_{:.3f}_{}_ts.csv".format(dataset,C,criteria)
     
-    outfile_tr = open(filename_tr,"w")
-    outfile_ts = open(filename_ts,"w")
+    #outfile_tr = open(filename_tr,"w")
+    #outfile_ts = open(filename_ts,"w")
 
-    for r in range(20):
+    for r in range(1):
         order = perm[r,:]
         tr_sz = int(np.floor(.7 * dataX.shape[0]))
         tr_idx = order[:tr_sz]
@@ -56,11 +56,15 @@ if __name__ == '__main__':
         ts_A = dataA.reindex(ts_X.index)
         tr_Y = dataY.reindex(tr_X.index)
         ts_Y = dataY.reindex(ts_X.index)
-        
+
         # Comment out to not include A in features
         tr_X = pd.concat([tr_X, tr_A], axis=1) 	
         ts_X = pd.concat([ts_X, ts_A], axis=1)
         # ---------
+
+        print(tr_A, tr_A.shape)
+        print(ts_A, ts_A.shape)
+        print(dataX.shape)
 
         for c in list(tr_X.columns):
             if tr_X[c].min() < 0 or tr_X[c].max() > 1:
@@ -82,8 +86,8 @@ if __name__ == '__main__':
         print("Test  - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_ts, exp_zo_ts,violation_ts))
         print("")
 
-        outfile_ts.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_ts,err_ts, violation_ts))
-        outfile_tr.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_tr,err_tr, violation_tr))
+        #outfile_ts.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_ts,err_ts, violation_ts))
+        #outfile_tr.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_tr,err_tr, violation_tr))
         
-    outfile_tr.close()
-    outfile_ts.close()
+    #outfile_tr.close()
+    #outfile_ts.close()
