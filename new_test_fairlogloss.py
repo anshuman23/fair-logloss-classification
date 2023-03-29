@@ -11,6 +11,30 @@ from fair_logloss import DP_fair_logloss_classifier, EOPP_fair_logloss_classifie
 from sklearn.metrics import accuracy_score
 
 
+def gen_grp_dict(y, pred, s):
+        grp_dict = {g: {} for g in [0,1]}
+
+        for g in [0,1]:
+            grp_dict[g]["y"] = [e for i, e in enumerate(y) if s[i] == g]
+            grp_dict[g]["pred"] = [e for i, e in enumerate(pred) if s[i] == g]
+
+        return grp_dict
+
+def dp(y, pred, s):
+        """ Demographic parity """
+        c0, c1 = 0,0 
+        for el in s:
+          if el == 0:
+            c0 += 1
+          elif el == 1:
+            c1 += 1
+        
+        grp_dict = gen_grp_dict(y, pred, s)
+
+        dp = sum(grp_dict[1.]["pred"]) / c1 - sum(grp_dict[0.]["pred"]) / c0
+        
+        return dp
+
 def compute_error(Yhat,proba,Y):
     err = 1 - np.sum(Yhat == Y) / Y.shape[0] 
     exp_zeroone = np.mean(np.where(Y == 1 , 1 - proba, proba))
@@ -98,8 +122,10 @@ if __name__ == '__main__':
         # print("---------------------------- Random Split %d ----------------------------------" % (r + 1))
         # print("Train - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_tr, exp_zo_tr,violation_tr))
         # print("Test  - predict_err : {:.3f} \t expected_err : {:.3f} \t fair_violation : {:.3f} ".format(err_ts, exp_zo_ts,violation_ts))
-        print("")
-        print(accuracy_score(h.predict(ts_X, ts_A), ts_Y))
+        ts_preds = h.predict(ts_X, ts_A)
+        print("Accuracy ==> ", accuracy_score(ts_preds, ts_Y))
+
+        print("DP ==> ", dp(ts_Y.values, ts_preds, ts_A.values)) 
 
         #outfile_ts.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_ts,err_ts, violation_ts))
         #outfile_tr.write("{:.4f},{:.4f},{:.4f}\n".format(exp_zo_tr,err_tr, violation_tr))
