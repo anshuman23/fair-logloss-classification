@@ -80,6 +80,18 @@ if __name__ == '__main__':
         y_test = np.load('../temp-bins/y_test.npy') 
         z_test = np.load('../temp-bins/z_test.npy')
 
+        try:
+          idx2del = np.load('../tempest/idx2delete.npy').tolist()
+          Z = []
+          for i,el in enumerate(z_train):
+            if i in idx2del:
+              continue
+            Z.append(el)
+          z_train = np.array(Z)
+          print(z_train.shape)
+        except:
+          pass
+
         tr_X = pd.DataFrame(xz_train)
         ts_X = pd.DataFrame(xz_test)
         tr_A = pd.Series(z_train)
