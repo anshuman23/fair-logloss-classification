@@ -40,15 +40,32 @@ def compute_error(Yhat,proba,Y):
     exp_zeroone = np.mean(np.where(Y == 1 , 1 - proba, proba))
     return err, exp_zeroone
 
+
+def deletion_fn(idx_list, arr):
+  newarr = []
+  for i,el in enumerate(arr):
+    if i in idx_list:
+      continue
+    newarr.append(el)
+  newarr = np.array(newarr)
+  return newarr 
+
+
 if __name__ == '__main__':
 
     dataset = ""
     if sys.argv[1] == 'adult':
         dataA,dataY,dataX,perm = prepare_IBM_adult()
         dataset = 'adult'
-    elif sys.argv[1] == 'custom':
-        dataA,dataY,dataX,perm = prepare_compas()
-        dataset = 'custom'
+    elif sys.argv[1] == 'dist_shift_adult':
+        dataA,dataY,dataX,perm = prepare_compas() #This will be ignored
+        dataset = 'dist_shift_adult'
+    elif sys.argv[1] == 'dist_shift_adult_loc':
+        dataA,dataY,dataX,perm = prepare_compas() #This will be ignored
+        dataset = 'dist_shift_adult_loc'
+    elif sys.argv[1] == 'dist_shift_adult_time':
+        dataA,dataY,dataX,perm = prepare_compas() #This will be ignored
+        dataset = 'dist_shift_adult_time'
     elif sys.argv[1] == 'law':
         dataA,dataY,dataX,perm = prepare_law()
         dataset = 'law'
@@ -80,17 +97,12 @@ if __name__ == '__main__':
         y_test = np.load('../temp-bins/y_test.npy') 
         z_test = np.load('../temp-bins/z_test.npy')
 
-        try:
-          idx2del = np.load('../tempest/idx2delete.npy').tolist()
-          Z = []
-          for i,el in enumerate(z_train):
-            if i in idx2del:
-              continue
-            Z.append(el)
-          z_train = np.array(Z)
-          print(z_train.shape)
-        except:
-          pass
+        if len(sys.argv) == 4:
+          idx2del = np.load('../fairness-shift/'+dataset+'/idx2delete.npy').tolist()
+          z_train = deletion_fn(idx2del, z_train)
+          xz_train = deletion_fn(idx2del, xz_train)
+          y_train = deletion_fn(idx2del, y_train)
+          print(xz_train.shape, y_train.shape, z_train.shape)
 
         tr_X = pd.DataFrame(xz_train)
         ts_X = pd.DataFrame(xz_test)
